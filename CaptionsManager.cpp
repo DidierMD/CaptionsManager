@@ -237,7 +237,7 @@ bool Caption::getFromStream(istream& in)
 bool Caption::getFromStream16(istream& in)
 {
 	unsigned int t[4];
-	int c;
+	char c;
 	string aux, tex; 
 	for(int j=0; j<4; ++j){
 		while(in.good() && !isdigit(c=in.get())) //Comer basura
@@ -262,10 +262,10 @@ bool Caption::getFromStream16(istream& in)
 	TimeMoment fin(t[0], t[1], t[2], t[3]); 
 
 	bool goodread=in.good();
-	while(in.good() && ((c=in.get()) != '\n')); //Comer hasta el final de linea
+	while(in.get(c) && c != '\n'); //Comer hasta el final de linea
 
 	getline(in,aux);
-	while(aux.size() > 1){
+	while(in && aux.size() > 1){ // Leer texto de subtítulo
 		tex = tex + aux + "\n";
 		getline(in, aux);
 	}
@@ -273,7 +273,6 @@ bool Caption::getFromStream16(istream& in)
 		setLifetime(TimeInterval(ini, fin));
 		setText(tex);
 	}
-	
 	return goodread;
 }
 
@@ -400,10 +399,9 @@ int CaptionsManager::readFromFile16(string filename)
 	ifstream arch(filename);
 	string aux;
 
-	if(!arch){
+	if(!arch.good()){
 		return 0;
 	}
-
 	Captions.clear();
 	while(arch.good()){
 		getline(arch,aux);
@@ -666,10 +664,12 @@ int main(void)
 			int count;
 			string nombrefichero;
 			cin >> nombrefichero;
-			if( (count = manejador.readFromFile16(nombrefichero)) )
+			if( (count = manejador.readFromFile16(nombrefichero)) ){
 				cout << count << " subtitulos leidos desde el archivo " << nombrefichero << endl;
-			else
+			}
+			else{
 				cout << "No se pudo leer archivo de subtitulos"<< endl;
+			}
 		}
 		else if(comando == "save"){
 			string nombrefichero;
